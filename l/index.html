@@ -105,14 +105,22 @@
     quote.hidden = false;
   }
 
-  // O app abre pelo Universal Link (este mesmo endereço) quando está
-  // instalado. Este botão é o caminho de quem chegou pelo navegador assim
-  // mesmo — um toque, mesmo esquema de sempre.
+  // O esquema próprio não precisa de entitlement nenhum: basta o app estar
+  // instalado. É por isso que o Social funciona inteiro sem conta paga — o
+  // Universal Link só economiza esta parada no navegador, não habilita nada.
   var deepLink = "lembrei://" + kind + "?v=1&d=" + data;
   var open = document.getElementById("open");
   open.href = deepLink;
   open.hidden = false;
   document.getElementById("note").hidden = false;
+
+  // No iPhone, tenta abrir sozinho. O sistema pergunta "Abrir no Lembrei?" e
+  // pronto — o mesmo destino do Universal Link, com uma confirmação a mais.
+  // Quem não tem o app fica aqui mesmo, com a mensagem e o botão de copiar,
+  // que é exatamente o que essa pessoa precisa ver.
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+    location.href = deepLink;
+  }
 
   var copy = document.getElementById("copy");
   copy.hidden = false;

@@ -30,20 +30,37 @@ cd lucasmello-dev.github.io && git add -A && git commit -m "feat: página do con
 
 Depois, em *Settings → Pages*, a origem deve ser a branch `main`, pasta `/`.
 
-## Conferir antes de testar no iPhone
+## Conferir
+
+O teste que vale não é o do nosso servidor — é o da CDN da Apple, que é quem
+de fato busca e interpreta o arquivo:
 
 ```bash
-# Precisa responder 200 e JSON. Se vier 404, faltou o .nojekyll.
+curl -s https://app-site-association.cdn-apple.com/a/v1/lucasmello-dev.github.io
+```
+
+Se voltar o JSON, está aceito. **Verificado em 2026-08-05: voltou o JSON.**
+
+Isso resolve, de passagem, a dúvida do cabeçalho: o GitHub Pages serve o
+arquivo como `application/octet-stream`, e não `application/json`, porque ele
+não tem extensão e não dá para configurar cabeçalho no Pages. A documentação
+antiga da Apple pedia `application/json` — a CDN aceitou assim mesmo, e é ela
+quem manda. Se um dia parar de aceitar, a saída é pôr um domínio próprio na
+frente (Cloudflare, Vercel e Netlify deixam configurar cabeçalho; o Pages não).
+
+O servidor cru, se precisar olhar:
+
+```bash
+# 200 e o JSON. Se vier 404, faltou o .nojekyll.
 curl -sI https://lucasmello-dev.github.io/.well-known/apple-app-site-association
-curl -s  https://lucasmello-dev.github.io/.well-known/apple-app-site-association
 ```
 
 Duas coisas que costumam morder:
 
 1. **Não pode haver redirecionamento** no caminho do `apple-app-site-association`.
    O GitHub Pages não redireciona esse caminho, mas confirme no `curl -I`.
-2. A Apple busca o arquivo por uma CDN e **guarda em cache**. Depois de publicar,
-   reinstalar o app no aparelho é o jeito mais rápido de forçar a releitura.
+2. A Apple **guarda o arquivo em cache**. Depois de mudar o arquivo, reinstalar
+   o app no aparelho é o jeito mais rápido de forçar a releitura.
 
 ## Se o Universal Link não subir
 
