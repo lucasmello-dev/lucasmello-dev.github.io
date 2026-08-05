@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Um lembrete pra você — Lembrei</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; display: grid; place-items: center; padding: 24px;
+    font: 400 17px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #f5f6fa; color: #10131a;
+  }
+  @media (prefers-color-scheme: dark) { body { background: #0c0e14; color: #f2f4f8; } }
+  main { width: 100%; max-width: 420px; text-align: center; }
+  .mark { font-size: 15px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; opacity: .5; }
+  h1 { font-size: 26px; font-weight: 700; margin: 14px 0 22px; }
+  blockquote {
+    margin: 0 0 26px; padding: 20px; border-radius: 18px; font-size: 19px;
+    background: #fff; border: 1px solid rgba(0,0,0,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    blockquote { background: #171b25; border-color: rgba(255,255,255,.1); }
+  }
+  a.button, button {
+    display: block; width: 100%; padding: 17px; margin-bottom: 12px; border: 0;
+    border-radius: 16px; font: inherit; font-weight: 600; cursor: pointer;
+    text-decoration: none; background: #2563eb; color: #fff;
+  }
+  button.secondary {
+    background: transparent; color: #2563eb; border: 1px solid rgba(37,99,235,.35);
+  }
+  p.note { font-size: 14px; opacity: .6; margin-top: 22px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <p class="mark">Lembrei</p>
+  <h1 id="headline">Abrindo seu lembrete…</h1>
+  <blockquote id="message" hidden></blockquote>
+
+  <a class="button" id="open" href="#" hidden>Abrir no Lembrei</a>
+  <button class="secondary" id="copy" hidden>Copiar a mensagem</button>
+
+  <p class="note" id="note" hidden>
+    Ainda não tem o app? Instale o Lembrei, copie a mensagem acima e toque em
+    <strong>Colar</strong> na aba Social.
+  </p>
+</main>
+
+<script>
+// O pedido inteiro está depois do "#". Fragmento nunca é enviado ao servidor:
+// nem esta página nem quem a hospeda vê o conteúdo do lembrete. É por isso que
+// esta feature não tem backend e não tem custo por uso.
+(function () {
+  var fields = {};
+  location.hash.replace(/^#/, "").split("&").forEach(function (pair) {
+    var i = pair.indexOf("=");
+    if (i > 0) fields[pair.slice(0, i)] = pair.slice(i + 1);
+  });
+
+  var headline = document.getElementById("headline");
+  var kind = fields.k;
+  var data = fields.d;
+
+  if (!data || (kind !== "pedido" && kind !== "recibo")) {
+    headline.textContent = "Esse link não traz um lembrete.";
+    return;
+  }
+
+  // base64url -> texto, com o UTF-8 preservado (btoa/atob sozinho quebra
+  // acento e emoji, e lembrete de gente tem os dois).
+  function decode(value) {
+    var padded = value.replace(/-/g, "+").replace(/_/g, "/");
+    while (padded.length % 4) padded += "=";
+    var binary = atob(padded);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder("utf-8").decode(bytes);
+  }
+
+  var payload;
+  try {
+    payload = JSON.parse(decode(data));
+  } catch (e) {
+    headline.textContent = "Não consegui ler esse lembrete.";
+    return;
+  }
+
+  var sender = (payload.n || "Alguém").trim();
+  var text = (payload.m || "").slice(0, 280);
+
+  if (kind === "recibo") {
+    headline.textContent = sender + " respondeu seu lembrete.";
+  } else {
+    headline.textContent = sender + " te mandou um lembrete:";
+  }
+
+  if (text) {
+    var quote = document.getElementById("message");
+    quote.textContent = "“" + text + "”";
+    quote.hidden = false;
+  }
+
+  // O app abre pelo Universal Link (este mesmo endereço) quando está
+  // instalado. Este botão é o caminho de quem chegou pelo navegador assim
+  // mesmo — um toque, mesmo esquema de sempre.
+  var deepLink = "lembrei://" + kind + "?v=1&d=" + data;
+  var open = document.getElementById("open");
+  open.href = deepLink;
+  open.hidden = false;
+  document.getElementById("note").hidden = false;
+
+  var copy = document.getElementById("copy");
+  copy.hidden = false;
+  copy.addEventListener("click", function () {
+    var full = headline.textContent + "\n\n" + (text ? "“" + text + "”\n\n" : "") + location.href;
+    navigator.clipboard.writeText(full).then(function () {
+      copy.textContent = "Copiado";
+    }, function () {
+      copy.textContent = "Copie o endereço da barra do navegador";
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["7T2YFZ3JJM.com.lucasmello.lembrei"],
+        "components": [
+          { "/": "/l/*", "comment": "convite e recibo do Social" },
+          { "/": "/l/", "comment": "o mesmo endereço sem nada depois" }
+        ]
+      }
+    ]
+  }
+}
