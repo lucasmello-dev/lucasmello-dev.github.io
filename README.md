@@ -16,7 +16,7 @@ repositório de usuário (`<usuário>.github.io`) serve a raiz, e por isso é el
 | Arquivo | Papel |
 |---|---|
 | `l/index.html` | A página do convite. Lê o pedido do fragmento (`#`), mostra o lembrete e oferece "Abrir no Lembrei". |
-| `.well-known/apple-app-site-association` | Diz ao iOS que `/l/*` pertence ao app `7T2YFZ3JJM.com.lucasmello.lembrei`. Sem ele o link abre no Safari em vez do app. |
+| `.well-known/apple-app-site-association` | Diz ao iOS que `/l/*` pertence ao app nas equipes de desenvolvimento (`7T2YFZ3JJM`) e distribuição paga (`92696QQ6C5`), com bundle `com.lucasmello.lembrei`. Sem ele o link abre no Safari em vez do app. |
 | `.nojekyll` | O GitHub Pages roda Jekyll por padrão, e Jekyll **ignora toda pasta que começa com ponto**. Sem este arquivo o `.well-known/` simplesmente não é publicado, e o Universal Link nunca funciona. |
 
 ## Publicar
